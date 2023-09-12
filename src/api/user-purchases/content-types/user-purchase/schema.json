@@ -1,0 +1,110 @@
+{
+  "kind": "collectionType",
+  "collectionName": "user_purchases",
+  "info": {
+    "singularName": "user-purchase",
+    "pluralName": "user-purchases",
+    "displayName": "Compras de usuario",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "amount": {
+      "type": "decimal"
+    },
+    "session_id": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "postal_code": {
+      "type": "string"
+    },
+    "address": {
+      "type": "text"
+    },
+    "name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "email"
+    },
+    "payment_method": {
+      "type": "enumeration",
+      "enum": [
+        "Card",
+        "Transfer"
+      ]
+    },
+    "payment_status": {
+      "type": "enumeration",
+      "enum": [
+        "pending",
+        "paid",
+        "unpaid",
+        "cancelled",
+        "refunded"
+      ]
+    },
+    "has_physical_items": {
+      "type": "boolean",
+      "default": false
+    },
+    "shipped": {
+      "type": "boolean"
+    },
+    "observations": {
+      "type": "text"
+    },
+    "months_expiration": {
+      "type": "integer"
+    },
+    "proof_of_payment": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "product": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::products.product"
+    },
+    "checkout_session_data": {
+      "type": "json"
+    },
+    "refund_data": {
+      "type": "json"
+    },
+    "payment_intent": {
+      "type": "string"
+    },
+    "product_id": {
+      "type": "string"
+    },
+    "price_id": {
+      "type": "string"
+    }
+  }
+}

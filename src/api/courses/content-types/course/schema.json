@@ -1,0 +1,89 @@
+{
+  "kind": "collectionType",
+  "collectionName": "courses",
+  "info": {
+    "singularName": "course",
+    "pluralName": "courses",
+    "displayName": "Cursos",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "short_name": {
+      "type": "string",
+      "required": false,
+      "maxLength": 20
+    },
+    "name": {
+      "type": "string",
+      "required": false,
+      "maxLength": 50
+    },
+    "description": {
+      "type": "richtext",
+      "required": false,
+      "maxLength": 1500
+    },
+    "slug": {
+      "type": "string",
+      "required": false,
+      "unique": true,
+      "maxLength": 50
+    },
+    "order": {
+      "type": "integer",
+      "required": false
+    },
+    "lessons": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::lessons.lesson",
+      "mappedBy": "course_id"
+    },
+    "cover": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "course_template": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::courses.course"
+    },
+    "category": {
+      "type": "enumeration",
+      "enum": [
+        "Lab_Academy",
+        "Foundation",
+        "Standard",
+        "Vacacional",
+        "Permanente",
+        "Basic"
+      ]
+    },
+    "active": {
+      "type": "boolean",
+      "required": false
+    },
+    "cohort": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::cohorts.cohort",
+      "mappedBy": "course"
+    },
+    "course_features": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::course-features.course-feature",
+      "mappedBy": "course_id"
+    }
+  }
+}

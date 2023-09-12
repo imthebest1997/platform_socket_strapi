@@ -1,0 +1,75 @@
+{
+  "kind": "collectionType",
+  "collectionName": "videos",
+  "info": {
+    "singularName": "video",
+    "pluralName": "videos",
+    "displayName": "Videos",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "guid": {
+      "type": "string",
+      "required": true,
+      "maxLength": 40
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 70,
+      "required": true
+    },
+    "dash_url": {
+      "type": "string",
+      "required": false,
+      "maxLength": 125
+    },
+    "dash_playlist": {
+      "type": "string",
+      "maxLength": 125,
+      "required": false
+    },
+    "hls_url": {
+      "type": "string",
+      "maxLength": 125,
+      "required": false
+    },
+    "hls_playlist": {
+      "type": "string",
+      "maxLength": 125,
+      "required": false
+    },
+    "src_video": {
+      "type": "string",
+      "required": true,
+      "maxLength": 50
+    },
+    "lesson_id": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::lessons.lesson",
+      "inversedBy": "videos"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    },
+    "provider": {
+      "type": "enumeration",
+      "enum": [
+        "amazon",
+        "vimeo",
+        "cloudflare"
+      ],
+      "required": true
+    },
+    "embel_url": {
+      "type": "string",
+      "maxLength": 125
+    }
+  }
+}

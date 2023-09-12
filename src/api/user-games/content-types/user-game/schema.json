@@ -1,0 +1,45 @@
+{
+  "kind": "collectionType",
+  "collectionName": "user_games",
+  "info": {
+    "singularName": "user-game",
+    "pluralName": "user-games",
+    "displayName": "Juegos de Usuarios",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "game_id": {
+      "type": "integer",
+      "required": true
+    },
+    "last_level": {
+      "type": "integer"
+    },
+    "cohort_id": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::cohorts.cohort"
+    },
+    "course": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::courses.course"
+    },
+    "lesson": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::lessons.lesson"
+    },
+    "user_id": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "game_result": {
+      "type": "json"
+    }
+  }
+}

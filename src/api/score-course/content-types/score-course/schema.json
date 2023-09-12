@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "score_courses",
+  "info": {
+    "singularName": "score-course",
+    "pluralName": "score-courses",
+    "displayName": "Notas de Cursos",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "evaluations_score": {
+      "type": "integer"
+    },
+    "tasks_score": {
+      "type": "integer"
+    },
+    "lessons_score": {
+      "type": "integer"
+    },
+    "more_score": {
+      "type": "json"
+    },
+    "cohort": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::cohorts.cohort"
+    },
+    "maximun_score": {
+      "type": "integer"
+    },
+    "pass_score": {
+      "type": "decimal"
+    },
+    "games_score": {
+      "type": "integer"
+    }
+  }
+}

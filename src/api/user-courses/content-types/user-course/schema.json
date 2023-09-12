@@ -1,0 +1,40 @@
+{
+    "kind": "collectionType",
+    "collectionName": "user_courses",
+    "info": {
+        "singularName": "user-course",
+        "pluralName": "user-courses",
+        "displayName": "Usuarios y cursos",
+        "description": ""
+    },
+    "options": {
+      "increments": true,
+      "timestamps": true,
+      "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+      "user_id": {
+        "type": "relation",
+        "relation": "oneToOne",
+        "target": "plugin::users-permissions.user"
+      },
+      "course_id": {
+        "type": "relation",
+        "relation": "oneToOne",
+        "target": "api::courses.course"
+      },
+      "cohort_id": {
+        "type": "relation",
+        "relation": "oneToOne",
+        "target": "api::cohorts.cohort"
+      },
+      "active": {
+        "type": "boolean",
+        "default": false
+      },
+      "expiration_date": {
+        "type": "datetime"
+      }
+    }
+  }

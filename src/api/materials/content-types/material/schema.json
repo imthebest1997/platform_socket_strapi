@@ -1,0 +1,29 @@
+{
+    "kind": "collectionType",
+    "collectionName": "materials",
+    "info": {
+        "singularName": "material",
+        "pluralName": "materials",
+        "displayName": "Materiales",
+        "description": ""
+    },
+    "options": {
+      "increments": true,
+      "timestamps": true,
+      "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+      "nombre": {
+        "type": "string"
+      },
+      "imagen": {
+        "allowedTypes": [
+          "images"
+        ],
+        "type": "media",
+        "plugin": "plugin::upload",
+        "multiple": false
+      }
+    }
+  }

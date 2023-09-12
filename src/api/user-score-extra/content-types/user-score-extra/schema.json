@@ -1,0 +1,52 @@
+{
+  "kind": "collectionType",
+  "collectionName": "user_score_extras",
+  "info": {
+    "singularName": "user-score-extra",
+    "pluralName": "user-score-extras",
+    "displayName": "Notas Extras de Usuarios",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "file_delivered": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ]
+    },
+    "score": {
+      "type": "decimal",
+      "min": 1,
+      "max": 10
+    },
+    "comment": {
+      "type": "text"
+    },
+    "cohort": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::cohorts.cohort"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "extra_note_id": {
+      "type": "integer"
+    },
+    "presentation_time": {
+      "type": "datetime"
+    },
+    "url": {
+      "type": "string"
+    }
+  }
+}

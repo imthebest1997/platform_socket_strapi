@@ -1,0 +1,68 @@
+{
+  "kind": "collectionType",
+  "collectionName": "user_tasks",
+  "info": {
+    "singularName": "user-task",
+    "pluralName": "user-tasks",
+    "displayName": "Tareas de usuario",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "qualified": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
+    "score": {
+      "type": "decimal",
+      "required": true
+    },
+    "presentation_time": {
+      "type": "datetime",
+      "required": true
+    },
+    "file_delivered": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "videos",
+        "files"
+      ]
+    },
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "lesson": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::lessons.lesson"
+    },
+    "course": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::courses.course"
+    },
+    "task_id": {
+      "type": "integer"
+    },
+    "cohort": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::cohorts.cohort"
+    },
+    "url": {
+      "type": "string"
+    },
+    "comment": {
+      "type": "text",
+      "maxLength": 300
+    }
+  }
+}

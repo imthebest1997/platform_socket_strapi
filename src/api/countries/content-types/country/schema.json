@@ -1,0 +1,31 @@
+{
+    "kind": "collectionType",
+    "collectionName": "countries",
+    "info": {
+        "singularName": "country",
+        "pluralName": "countries",
+        "displayName": "Países",
+        "description": ""
+    },
+    "options": {
+      "increments": true,
+      "timestamps": true,
+      "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+      "name": {
+        "type": "string",
+        "unique": true,
+        "required": true
+      },
+      "code": {
+        "type": "string",
+        "unique": true,
+        "required": true
+      },
+      "description": {
+        "type": "richtext"
+      }
+    }
+  }

@@ -1,0 +1,40 @@
+{
+  "kind": "collectionType",
+  "collectionName": "score_final_users",
+  "info": {
+    "singularName": "score-final-user",
+    "pluralName": "score-final-users",
+    "displayName": "Notas Finales de Usuarios",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "more_score_data": {
+      "type": "json"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "cohort": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::cohorts.cohort"
+    },
+    "final_score": {
+      "type": "decimal"
+    },
+    "approved": {
+      "type": "boolean"
+    },
+    "certificated_code": {
+      "type": "string"
+    },
+    "user_score": {
+      "type": "json"
+    }
+  }
+}

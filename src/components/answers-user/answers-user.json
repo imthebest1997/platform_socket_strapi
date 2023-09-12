@@ -1,0 +1,27 @@
+{
+  "collectionName": "components_answers_user_answers_users",
+  "info": {
+    "displayName": "Answers-user",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "content": {
+      "type": "richtext",
+      "required": true
+    },
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "answers": {
+      "type": "component",
+      "repeatable": true,
+      "component": "answers-user.answer-answer"
+    },
+    "published": {
+      "type": "datetime"
+    }
+  }
+}

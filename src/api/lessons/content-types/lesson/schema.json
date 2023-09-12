@@ -1,0 +1,66 @@
+{
+    "kind": "collectionType",
+    "collectionName": "lessons",
+    "info": {
+        "singularName": "lesson",
+        "pluralName": "lessons",
+        "displayName": "Clases",
+        "description": ""
+    },
+    "options": {
+      "increments": true,
+      "timestamps": true,
+      "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+      "title": {
+        "type": "string",
+        "required": true,
+        "maxLength": 150
+      },
+      "description": {
+        "type": "text",
+        "required": true,
+        "maxLength": 500
+      },
+      "content": {
+        "type": "richtext"
+      },
+      "slug": {
+        "type": "string",
+        "unique": false,
+        "required": true,
+        "maxLength": 50
+      },
+      "order": {
+        "type": "integer",
+        "required": true
+      },
+      "course_id": {
+        "type": "relation",
+        "relation": "manyToOne",
+        "target": "api::courses.course",
+        "inversedBy": "lessons"
+      },
+      "active": {
+        "type": "boolean",
+        "default": true,
+        "required": true
+      },
+      "videos": {
+        "type": "relation",
+        "relation": "oneToMany",
+        "target": "api::videos.video",
+        "mappedBy": "lesson_id"
+      },
+      "references": {
+        "type": "json"
+      },
+      "resource": {
+        "type": "boolean",
+        "default": false,
+        "required": true
+      }
+    }
+  }

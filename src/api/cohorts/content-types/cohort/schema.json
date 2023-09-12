@@ -1,0 +1,65 @@
+{
+  "kind": "collectionType",
+  "collectionName": "cohort",
+  "info": {
+    "singularName": "cohort",
+    "pluralName": "cohorts",
+    "displayName": "cohorts",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "start_date": {
+      "type": "datetime",
+      "required": true
+    },
+    "end_date": {
+      "type": "datetime",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "active": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
+    "course": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::courses.course",
+      "inversedBy": "cohort"
+    },
+    "institution": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::institutions.institution"
+    },
+    "students": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::users-permissions.user"
+    },
+    "teachers": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::users-permissions.user"
+    },
+    "active_lessons": {
+      "type": "json"
+    },
+    "references": {
+      "type": "json"
+    }
+  }
+}

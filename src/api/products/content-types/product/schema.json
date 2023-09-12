@@ -1,0 +1,78 @@
+{
+    "kind": "collectionType",
+    "collectionName": "products",
+    "info": {
+        "singularName": "product",
+        "pluralName": "products",
+        "displayName": "Productos",
+        "description": ""
+    },
+    "options": {
+      "increments": true,
+      "timestamps": true,
+      "draftAndPublish": false
+    },
+    "attributes": {
+      "price_in_cents": {
+        "type": "decimal",
+        "default": 0,
+        "min": 0
+      },
+      "product_id": {
+        "type": "string"
+      },
+      "price_id": {
+        "type": "string"
+      },
+      "has_physical_items": {
+        "type": "boolean",
+        "default": false
+      },
+      "only_institutions": {
+        "type": "boolean",
+        "default": false
+      },
+      "courses": {
+        "type": "relation",
+        "relation": "oneToMany",
+        "target": "api::courses.course"
+      },
+      "materials": {
+        "type": "relation",
+        "relation": "oneToMany",
+        "target": "api::materials.material"
+      },
+      "name": {
+        "type": "string",
+        "required": false
+      },
+      "image": {
+        "allowedTypes": [
+            "images"
+          ],
+          "type": "media",
+          "plugin": "plugin::upload",
+          "multiple": false
+      },
+      "public": {
+        "type": "boolean",
+        "default": false
+      },
+      "expires_in": {
+        "type": "integer",
+        "default": 1,
+        "min": 0
+      },
+      "description": {
+        "type": "richtext"
+      },
+      "slug": {
+        "type": "string"
+      },
+      "countries": {
+        "type": "relation",
+        "relation": "oneToMany",
+        "target": "api::countries.country"
+      }
+    }
+  }

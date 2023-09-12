@@ -1,0 +1,22 @@
+{
+  "collectionName": "components_answers_user_answer_answers",
+  "info": {
+    "displayName": "Answer-answer",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "content": {
+      "type": "richtext",
+      "required": true
+    },
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "published": {
+      "type": "datetime"
+    }
+  }
+}

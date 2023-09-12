@@ -1,0 +1,45 @@
+{
+  "kind": "collectionType",
+  "collectionName": "score_extras",
+  "info": {
+    "singularName": "score-extra",
+    "pluralName": "score-extras",
+    "displayName": "Notas Extras",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "content": {
+      "type": "richtext",
+      "required": true
+    },
+    "finished_date": {
+      "type": "datetime",
+      "required": true
+    },
+    "cohort": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::cohorts.cohort"
+    },
+    "file_size_maximun": {
+      "type": "integer",
+      "min": 1
+    },
+    "accepted_files": {
+      "type": "string"
+    },
+    "files_accept": {
+      "type": "json"
+    },
+    "upload_report": {
+      "type": "boolean"
+    }
+  }
+}

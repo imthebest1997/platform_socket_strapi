@@ -1,0 +1,51 @@
+{
+  "kind": "collectionType",
+  "collectionName": "book_codes",
+  "info": {
+    "singularName": "book-code",
+    "pluralName": "book-codes",
+    "displayName": "Códigos de libros",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "code": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "maxLength": 10
+    },
+    "grade": {
+      "type": "integer",
+      "required": true
+    },
+    "number": {
+      "type": "integer",
+      "required": true
+    },
+    "generated_date": {
+      "type": "datetime",
+      "required": true
+    },
+    "generated_by": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "activated_by": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "cohort": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::cohorts.cohort"
+    }
+  }
+}

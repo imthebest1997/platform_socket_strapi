@@ -1,0 +1,65 @@
+{
+  "kind": "collectionType",
+  "collectionName": "evaluations",
+  "info": {
+    "singularName": "evaluation",
+    "pluralName": "evaluationss",
+    "displayName": "Evaluaciones",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "score": {
+      "type": "decimal",
+      "required": true,
+      "min": 1
+    },
+    "active": {
+      "type": "boolean",
+      "required": true
+    },
+    "content": {
+      "type": "richtext",
+      "required": false,
+      "maxLength": 1400
+    },
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "max_time_minutes": {
+      "type": "integer",
+      "required": true,
+      "min": 1
+    },
+    "attempts": {
+      "type": "integer",
+      "min": 1,
+      "default": 1
+    },
+    "lessons": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::lessons.lesson"
+    },
+    "user_created": {
+      "type": "integer"
+    },
+    "questions": {
+      "type": "dynamiczone",
+      "components": [
+        "question-body.question"
+      ],
+      "required": true,
+      "min": 1
+    },
+    "evaluation_finish_date": {
+      "type": "datetime"
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "kind": "collectionType",
+  "collectionName": "users_progress",
+  "info": {
+    "singularName": "user-progress",
+    "pluralName": "users-progress",
+    "displayName": "Progreso del usuario",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "finished": {
+      "type": "boolean",
+      "default": false
+    },
+    "general_data": {
+      "type": "json"
+    },
+    "individual_data": {
+      "type": "json"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "course": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::courses.course"
+    },
+    "cohort": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::cohorts.cohort"
+    },
+    "final_score": {
+      "type": "decimal"
+    },
+    "max_score": {
+      "type": "integer"
+    }
+  }
+}

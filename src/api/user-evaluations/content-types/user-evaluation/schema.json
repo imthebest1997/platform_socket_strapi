@@ -1,0 +1,54 @@
+{
+    "kind": "collectionType",
+    "collectionName": "user_evaluation",
+    "info": {
+      "singularName": "user-evaluation",
+      "pluralName": "user-evaluations",
+      "displayName": "Evaluaciones de usuario",
+      "description": ""
+    },
+    "options": {
+      "increments": true,
+      "timestamps": true,
+      "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+      "score_obtained": {
+        "type": "decimal"
+      },
+      "score_max": {
+        "type": "decimal"
+      },
+      "presentation_time": {
+        "type": "datetime"
+      },
+      "evaluation_id": {
+        "type": "biginteger",
+        "required": true
+      },
+      "user_id": {
+        "type": "relation",
+        "relation": "oneToOne",
+        "target": "plugin::users-permissions.user"
+      },
+      "lesson": {
+        "type": "relation",
+        "relation": "oneToOne",
+        "target": "api::lessons.lesson"
+      },
+      "course": {
+        "type": "relation",
+        "relation": "oneToOne",
+        "target": "api::courses.course"
+      },
+      "evaluation_result": {
+        "type": "json"
+      },
+      "cohort_id": {
+        "type": "relation",
+        "relation": "oneToOne",
+        "target": "api::cohorts.cohort"
+      }
+    }
+  }

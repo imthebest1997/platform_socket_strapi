@@ -1,0 +1,47 @@
+{
+  "kind": "collectionType",
+  "collectionName": "course_features",
+  "info": {
+    "singularName": "course-feature",
+    "pluralName": "course-features",
+    "displayName": "Características de curso",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "maxLength": 50,
+      "required": true
+    },
+    "description": {
+      "type": "text",
+      "required": true,
+      "maxLength": 250
+    },
+    "icon": {
+      "type": "string",
+      "maxLength": 30
+    },
+    "order": {
+      "type": "integer",
+      "required": true
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    },
+    "course_id": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::courses.course",
+      "inversedBy": "course_features"
+    }
+  }
+}
