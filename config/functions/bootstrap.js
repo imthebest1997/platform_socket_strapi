@@ -1,13 +1,17 @@
-module.exports = cb => {
-  // import socket io
-  var io = require('socket.io')(strapi.server);
-  // listen for user connection
-  io.on('connection', function(socket){
-    // send message on user connection
-    socket.emit('hello', JSON.stringify({message: 'Hello food lover'}));
-    // listen for user diconnect
-    socket.on('disconnect', () => console.log('a user disconnected'));
-  });
-  strapi.io = io; // register socket io inside strapi main object to use it globally anywhere
-  cb();
-};
+// module.exports = (cb) => {
+//   const io = require("socket.io")(strapi.server, {
+//     cors: {
+//       origin: "*",
+//       methods: ["GET", "POST"],
+//     },
+//   });
+//   io.on("connection", function (socket) {
+//     // send message on user connection
+//     socket.emit("hello", JSON.stringify({ message: "Welcome to my website" }));
+//     console.log("Estamos emitiendo");
+//   });
+
+//   strapi.io = io;
+//   strapi.emitToAllUsers = food => io.emit('player_data', food);
+//   cb();
+// };
