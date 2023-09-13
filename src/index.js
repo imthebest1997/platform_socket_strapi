@@ -37,6 +37,11 @@ module.exports = {
       // socket.emit("hello", JSON.stringify({ message: "Welcome to my website" }));
       socket.emit("hello", { message: "Welcome to my website" });
 
+      // socket.on("new-task", (task) => {
+      //   console.log("Task created sucessfull");
+      //   console.log(task);
+      // })
+
       socket.on("disconnected", ()=>{
         console.log("A user disconnected: ", socket.id);
       });
