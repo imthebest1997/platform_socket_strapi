@@ -28,6 +28,7 @@
     "@strapi/provider-upload-aws-s3": "4.11.1",
     "@strapi/strapi": "4.11.1",
     "@uiw/react-md-editor": "3.20",
+    "axios": "^1.5.0",
     "date-fns-tz": "^2.0.0",
     "geoip-lite": "^1.4.7",
     "hashids": "^2.3.0",
@@ -36,6 +37,8 @@
     "puppeteer": "19.4.0",
     "rimraf": "^5.0.1",
     "socket.io": "^4.7.2",
+    "strapi-plugin-io": "^1.1.4",
+    "strapi-plugin-socket-io": "^2.1.2",
     "stripe": "8.186.1",
     "tus-js-client": "3.1.1",
     "uuid": "3.4.0"
