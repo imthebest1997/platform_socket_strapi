@@ -33,18 +33,27 @@ module.exports = {
       console.log("A user connected: ", socket.id);
       console.log("Estamos emitiendo");
 
-      socket.emit("hello", { message: "Welcome to my website" });
+      socket.on("join", ({lessonsId}) => {
+        if(lessonsId){
+          socket.join(lessonsId);
+          console.log("Se unio al curso: ", lessonsId);
+        }else{
+          console.log("Error al unirse");
+        }
+      });
 
-      socket.on("create_task", async ({token, ...taskCreated})=>{
+
+      socket.on("create_task", async ({token, lessons, ...taskCreated})=>{
         // console.log(taskCreated);
-        // console.log(token);
         let strapiData = {
           data: {
             ...taskCreated
           },
         };
 
-        console.log(strapiData);
+        // console.log(token);
+        // console.log(strapiData);
+        // console.log(lessons);
 
         await axios
           .post("http://localhost:1337/api/tasks", strapiData,{
@@ -53,10 +62,15 @@ module.exports = {
             }
           })
           .then((e) => {
-            io.emit("task", {
+            socket.broadcast.to(lessons).emit("task", {
               ...taskCreated,
               message: "Tarea creada satisfactoriamente"
             });
+
+            // io.emit("task", {
+            //   ...taskCreated,
+            //   message: "Tarea creada satisfactoriamente"
+            // });
           })
           .catch((e) => console.log("error: ", e.message));
 
