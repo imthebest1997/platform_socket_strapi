@@ -37,6 +37,21 @@
     },
     "final_date": {
       "type": "datetime"
+    },
+    "foro": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::forums.forum"
+    },
+    "evaluacion": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::evaluations.evaluation"
+    },
+    "juego": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::games.game"
     }
   }
 }

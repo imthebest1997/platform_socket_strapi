@@ -11,7 +11,7 @@ module.exports = createCoreController('api::notification.notification', ({ strap
   async find(ctx){
     try {
       const notifications = await strapi.db.query('api::notification.notification').findMany({
-        populate: ['course', 'task']
+        populate: ['course', 'task', 'foro', 'evaluacion', 'juego']
       });
       return notifications;
     } catch (error) {
@@ -29,13 +29,9 @@ module.exports = createCoreController('api::notification.notification', ({ strap
       where: {id: course}
     });
 
-    // const taskFound = await strapy.db.query('api::tasks.task').findOne({
-    //   where: {id: course}
-    // });
-
     const notifications = await strapi.db.query('api::notification.notification').findMany({
       where: {course: courseFound.id},
-      populate: ['course', 'task']
+      populate: ['course', 'task', 'foro','evaluacion', 'juego']
     });
 
     return notifications;
@@ -47,9 +43,8 @@ module.exports = createCoreController('api::notification.notification', ({ strap
 
       // Consulta la notificación por su ID (asumiendo que tienes un modelo llamado 'notification')
       const notification = await strapi.db.query('api::notification.notification').findOne({
-        where: {
-          id: id
-        },
+        where: {id: id},
+        populate: ['course', 'task', 'foro','evaluacion', 'juego']
       })
 
       if (!notification) {

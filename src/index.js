@@ -29,22 +29,23 @@ module.exports = {
       }
     });
 
-    io.on("connection", (socket) => {
-      console.log("A user connected: ", socket.id);
-      console.log("Estamos emitiendo");
+    let users = {};
 
-      socket.on("join", ({lessonsId}) => {
-        if(lessonsId){
-          socket.join(lessonsId);
-          console.log("Se unio al curso: ", lessonsId);
-        }else{
-          console.log("Error al unirse");
+    function enviarNotificacionACurso(cursoId, mensaje) {
+      io.to(`curso_${cursoId}`).emit('notificacion', mensaje);
+    }
+
+    io.on("connection", (socket) => {
+      // console.log("A user connected: ", socket.id);
+      // console.log("Estamos emitiendo");
+
+      socket.on('setUserId', function (userId) {
+        if (!users[userId] && userId != null) { // Verifica si la clave ya existe en el objeto
+          users[userId] = socket;
         }
       });
 
-
-      socket.on("create_task", async ({token, lessons, ...taskCreated})=>{
-        // console.log(taskCreated);
+      socket.on("create_task", async ({token, lessons, students, course, ...taskCreated})=>{
         let strapiData = {
           data: {
             ...taskCreated,
@@ -55,7 +56,7 @@ module.exports = {
         // console.log(token);
         // console.log(strapiData);
         // console.log(lessons);
-
+        console.log(students);
         await axios
           .post("http://localhost:1337/api/tasks", strapiData,{
             headers: {
@@ -63,18 +64,23 @@ module.exports = {
             }
           })
           .then((e) => {
-            socket.broadcast.to(lessons).emit("task", {
-              ...taskCreated,
-              message: "Tarea creada satisfactoriamente"
-            });
-
-            // io.emit("task", {
+            for(let idStudent of students){
+              if (users[idStudent]) {
+                users[idStudent].emit('task', {
+                    ...taskCreated,
+                    message: "Tarea creada satisfactoriamente"
+                });
+              }else {
+                console.log(`El usuario con ID ${idStudent} no está registrado.`);
+                // Aquí puedes manejar la situación en la que el usuario no está registrado.
+              }
+            }
+            // socket.broadcast.to(lessons).emit("task", {
             //   ...taskCreated,
             //   message: "Tarea creada satisfactoriamente"
             // });
           })
           .catch((e) => console.log("error: ", e.message));
-
       });
 
       socket.on("disconnected", ()=>{
