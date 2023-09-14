@@ -47,7 +47,8 @@ module.exports = {
         // console.log(taskCreated);
         let strapiData = {
           data: {
-            ...taskCreated
+            ...taskCreated,
+            lessons
           },
         };
 
