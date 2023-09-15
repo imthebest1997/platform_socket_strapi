@@ -21,6 +21,11 @@ module.exports = {
     },
     {
       method: 'GET',
+      path: '/findCohortsToNotification',
+      handler: 'api::cohorts.cohort.findCohortsToNotification',
+    },
+    {
+      method: 'GET',
       path: '/findChortsInstitution/:institution',
       handler: 'api::cohorts.cohort.findCohortByInstitution',
       config: {

@@ -31,13 +31,7 @@ module.exports = {
 
     let users = {};
 
-    function enviarNotificacionACurso(cursoId, mensaje) {
-      io.to(`curso_${cursoId}`).emit('notificacion', mensaje);
-    }
-
-    io.on("connection", (socket) => {
-      // console.log("A user connected: ", socket.id);
-      // console.log("Estamos emitiendo");
+    io.on("connection", async (socket) => {
 
       socket.on('setUserId', function (userId) {
         if (!users[userId] && userId != null) { // Verifica si la clave ya existe en el objeto
@@ -53,9 +47,6 @@ module.exports = {
           },
         };
 
-        // console.log(token);
-        // console.log(strapiData);
-        // console.log(lessons);
         console.log(students);
         await axios
           .post("http://localhost:1337/api/tasks", strapiData,{
@@ -66,19 +57,16 @@ module.exports = {
           .then((e) => {
             for(let idStudent of students){
               if (users[idStudent]) {
+                console.log("Se emitio a los estudiantes del curso con id: " + course);
+                console.log("Se emitio la notificacion al usuario " + idStudent);
                 users[idStudent].emit('task', {
                     ...taskCreated,
                     message: "Tarea creada satisfactoriamente"
                 });
               }else {
                 console.log(`El usuario con ID ${idStudent} no está registrado.`);
-                // Aquí puedes manejar la situación en la que el usuario no está registrado.
               }
             }
-            // socket.broadcast.to(lessons).emit("task", {
-            //   ...taskCreated,
-            //   message: "Tarea creada satisfactoriamente"
-            // });
           })
           .catch((e) => console.log("error: ", e.message));
       });

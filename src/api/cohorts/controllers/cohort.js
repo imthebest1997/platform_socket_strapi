@@ -343,5 +343,48 @@ module.exports = createCoreController('api::cohorts.cohort', ({ strapi }) => ({
       });
     }
     ctx.send({ message: 'Se actualizaron las referencias con éxito' });
+  },
+  async findCohortsToNotification(ctx) {
+    const { cohort_id, course } = ctx.query;
+    strapi.log.debug(`Obtener los estudiantes del cohort: ${cohort_id}, con el docente: ${ctx.state.user.id}`);
+    let result;
+    let resultCourse;
+    let cohortCustomized;
+    if (cohort_id) {
+      let lessonsID = [];
+      let studentsID = [];
+
+      resultCourse = await strapi.db.query('api::courses.course').findOne({
+        where: { id: course },
+        populate: ['lessons'],
+      });
+
+      result = await strapi.db.query('api::cohorts.cohort').findOne({
+        where: { id: cohort_id, teachers: ctx.state.user.id },
+        populate: ['students', 'course', 'lessons'],
+      });
+
+      if(resultCourse.lessons.length > 0){
+        for(let i of resultCourse.lessons)
+          lessonsID.push(i.id);
+      }
+
+      if(result.students.length > 0){
+        for(let i of result.students){
+          studentsID.push(i.id);
+        }
+      }
+
+      cohortCustomized = {
+          "cohort":result.id,
+          "course_id": result.course.id,
+          "lessons": lessonsID,
+          "students": studentsID
+      }
+
+    }
+
+    return cohortCustomized;
   }
+
 }));
