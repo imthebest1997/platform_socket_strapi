@@ -1,0 +1,25 @@
+{
+  "kind": "collectionType",
+  "collectionName": "active_users",
+  "info": {
+    "singularName": "active-user",
+    "pluralName": "active-users",
+    "displayName": "Active User"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "user_id": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "socket_id": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    }
+  }
+}

@@ -18,6 +18,8 @@ module.exports = {
    */
   bootstrap({ strapi }) {
     let {Server} = require("socket.io");
+    const { getActiveUsers } = require("./external-services/active-users-service");
+
     let axios = require("axios");
 
     let io = new Server(strapi.server.httpServer,{
@@ -30,10 +32,14 @@ module.exports = {
     });
 
     let users = {};
+    let usersConnected = [];
 
     io.on("connection", async (socket) => {
 
-      socket.on('setUserId', function (userId) {
+      const activeUsers = await getActiveUsers();
+      console.log(activeUsers);
+      // console.log(activeUsers);
+      socket.on('setUserId', async ({userId, token}) => {
         if (!users[userId] && userId != null) { // Verifica si la clave ya existe en el objeto
           users[userId] = socket;
         }
@@ -47,7 +53,7 @@ module.exports = {
           },
         };
 
-        console.log(students);
+        // console.log(students);
         await axios
           .post("http://localhost:1337/api/tasks", strapiData,{
             headers: {
@@ -71,9 +77,7 @@ module.exports = {
           .catch((e) => console.log("error: ", e.message));
       });
 
-      socket.on("disconnected", ()=>{
-        console.log("A user disconnected: ", socket.id);
-      });
+      socket.on('disconnect', () => console.log("Cliente desconectado"));
 
     });
 
