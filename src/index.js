@@ -34,12 +34,13 @@ module.exports = {
     let activeUsers = [];
     let users = {};
     io.on("connection", async (socket) => {
-
+      console.log("Usuario conectado: " + socket.id);
       //Consultar el listado de usuarios conectados
       activeUsers = await getActiveUsers();
 
       //Cuando un usuario se conecta, emite su ID
       socket.on('setUserId', async ({userId, token}) => {
+        console.log("Socket id: " + socket.id + " user id: " + userId);
         if(userId !== undefined){
           //Buscar el id del usuario en la coleccion
           const user = await findUserInArray(activeUsers, userId);
@@ -53,11 +54,10 @@ module.exports = {
             const {data, status}  = await updateActiveUser(socket.id, userId, token);
             activeUsers = await getActiveUsers();
             users[userId] = socket;
-            console.log(activeUsers);
+            // console.log(activeUsers);
           }
         }
       });
-
 
       socket.on("create_task", async ({token, lessons, students, course, ...taskCreated})=>{
         let strapiData = {
