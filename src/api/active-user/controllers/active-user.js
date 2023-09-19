@@ -59,6 +59,27 @@ module.exports = createCoreController('api::active-user.active-user', ({ strapi 
       // Maneja errores aquí si es necesario
       return ctx.throw(500, 'Ocurrió un error al buscar los datos del usuario.');
     }
-  }
+  },
 
+  async update(ctx){
+    // Actualizar usuario
+    const {user_id, socket_id } = ctx.request.body;
+
+
+    // Consulta la notificación por su ID (asumiendo que tienes un modelo llamado 'notification')
+    const userActive = await strapi.db.query('api::active-user.active-user').findOne({
+      where: {user_id}
+    });
+
+    if (!userActive) {
+      return ctx.send({ message: 'Usuario activo no encontrado.' }, 404);
+    }
+
+    await strapi.db.query('api::active-user.active-user').update({
+      where: {user_id},
+      data: { socket_id },
+    });
+
+    ctx.send({ message: 'Usuario actualizado con éxito' });
+  }
 }));

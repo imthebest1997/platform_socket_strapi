@@ -18,7 +18,7 @@ module.exports = {
    */
   bootstrap({ strapi }) {
     let {Server} = require("socket.io");
-    const { getActiveUsers } = require("./external-services/active-users-service");
+    const { getActiveUsers, createActiveUser, findUserInArray, updateActiveUser } = require("./external-services/active-users-service");
 
     let axios = require("axios");
 
@@ -31,19 +31,33 @@ module.exports = {
       }
     });
 
+    let activeUsers = [];
     let users = {};
-    let usersConnected = [];
-
     io.on("connection", async (socket) => {
 
-      const activeUsers = await getActiveUsers();
-      console.log(activeUsers);
-      // console.log(activeUsers);
+      //Consultar el listado de usuarios conectados
+      activeUsers = await getActiveUsers();
+
+      //Cuando un usuario se conecta, emite su ID
       socket.on('setUserId', async ({userId, token}) => {
-        if (!users[userId] && userId != null) { // Verifica si la clave ya existe en el objeto
-          users[userId] = socket;
+        if(userId !== undefined){
+          //Buscar el id del usuario en la coleccion
+          const user = await findUserInArray(activeUsers, userId);
+          if(user.length === 0){
+            //Crear usuario
+            const {data, status} = await createActiveUser(socket.id, userId, token);
+            activeUsers = await getActiveUsers();
+            users[userId] = socket;
+          }else{
+            //Actualizar usuario
+            const {data, status}  = await updateActiveUser(socket.id, userId, token);
+            activeUsers = await getActiveUsers();
+            users[userId] = socket;
+            console.log(activeUsers);
+          }
         }
       });
+
 
       socket.on("create_task", async ({token, lessons, students, course, ...taskCreated})=>{
         let strapiData = {
@@ -62,15 +76,14 @@ module.exports = {
           })
           .then((e) => {
             for(let idStudent of students){
-              if (users[idStudent]) {
-                console.log("Se emitio a los estudiantes del curso con id: " + course);
-                console.log("Se emitio la notificacion al usuario " + idStudent);
-                users[idStudent].emit('task', {
-                    ...taskCreated,
-                    message: "Tarea creada satisfactoriamente"
+              const userConnected = activeUsers.find((user) => user.user_id === idStudent.toString());
+
+              //Si el usuario conectado se le emite la notificacion en tiempo real.
+              if(userConnected){
+                users[idStudent].emit("task_created", {
+                  ...taskCreated,
+                  message: "Tarea creada satisfactoriamente"
                 });
-              }else {
-                console.log(`El usuario con ID ${idStudent} no está registrado.`);
               }
             }
           })

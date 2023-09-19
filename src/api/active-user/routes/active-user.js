@@ -30,7 +30,7 @@ module.exports = {
     },
     {
       method: 'PUT',
-      path: '/active-users/:userID',
+      path: '/active-users/',
       handler: 'api::active-user.active-user.update',
     },
     {
