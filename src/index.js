@@ -43,6 +43,7 @@ module.exports = {
         if(userId !== undefined){
           //Buscar el id del usuario en la coleccion
           const user = await findUserInArray(activeUsers, userId);
+
           if(user.length === 0){
             //Crear usuario
             const {data, status} = await createActiveUser(socket.id, userId, token);
@@ -57,7 +58,6 @@ module.exports = {
           }
         }
       });
-
 
       socket.on("create_task", async ({token, lessons, students, course, ...taskCreated})=>{
         let strapiData = {
@@ -77,6 +77,19 @@ module.exports = {
           .then((e) => {
             for(let idStudent of students){
               const userConnected = activeUsers.find((user) => user.user_id === idStudent.toString());
+              console.log(userConnected);
+              io.sockets.sockets.forEach((socket) => {
+                if (socket.id === userConnected?.socket_id && userConnected) {
+                  // socket.disconnect();//Disconnecting the User
+                  // socket.removeAllListeners();
+                  socket.emit("task_created", {
+                    ...taskCreated,
+                    message: "Tarea creada v2 satisfactoriamente"
+                  });
+                } else {
+                  console.log("");
+                }
+              });
 
               //Si el usuario conectado se le emite la notificacion en tiempo real.
               if(userConnected && users[idStudent]){
@@ -93,7 +106,6 @@ module.exports = {
       socket.on('disconnect', () => console.log("Cliente desconectado"));
 
     });
-
     strapi.io = io;
   },
 };
