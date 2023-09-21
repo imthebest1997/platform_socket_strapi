@@ -59,51 +59,31 @@ module.exports = {
         }
       });
 
-      socket.on("create_task", async ({token, lessons, students, course, ...taskCreated})=>{
-        let strapiData = {
-          data: {
-            ...taskCreated,
-            lessons
-          },
-        };
-
-        // console.log(students);
-        await axios
-          .post("http://localhost:1337/api/tasks", strapiData,{
-            headers: {
-              Authorization: `Bearer ${token}`,
-            }
-          })
-          .then((e) => {
-            for(let idStudent of students){
-              const userConnected = activeUsers.find((user) => user.user_id === idStudent.toString());
-              console.log(userConnected);
-              io.sockets.sockets.forEach((socket) => {
-                if (socket.id === userConnected?.socket_id && userConnected) {
-                  // socket.disconnect();//Disconnecting the User
-                  // socket.removeAllListeners();
-                  socket.emit("task_created", {
-                    ...taskCreated,
-                    message: "Tarea creada v2 satisfactoriamente"
-                  });
-                } else {
-                  console.log("");
-                }
+      socket.on("create_task", ({students, ...taskCreated})=>{
+        for(let idStudent of students){
+          const userConnected = activeUsers.find((user) => user.user_id === idStudent.toString());
+          //Versión v1.
+          io.sockets.sockets.forEach((socket) => {
+            if (socket.id === userConnected?.socket_id && userConnected) {
+              socket.emit("task_created", {
+                ...taskCreated,
+                message: "Tarea creada v2 satisfactoriamente"
               });
-
-              //Si el usuario conectado se le emite la notificacion en tiempo real.
-              if(userConnected && users[idStudent]){
-                users[idStudent].emit("task_created", {
-                  ...taskCreated,
-                  message: "Tarea creada satisfactoriamente"
-                });
-              }
             }
-          })
-          .catch((e) => console.log("error: ", e.message));
+          });
+
+          //Versión v2.
+          //Si el usuario conectado se le emite la notificacion en tiempo real.
+          if(userConnected && users[idStudent]){
+            users[idStudent].emit("task_created", {
+              ...taskCreated,
+              message: "Tarea creada satisfactoriamente"
+            });
+          }
+        }
       });
 
-      socket.on('disconnect', () => console.log("Cliente desconectado"));
+    socket.on('disconnect', () => console.log("Cliente desconectado"));
 
     });
     strapi.io = io;
