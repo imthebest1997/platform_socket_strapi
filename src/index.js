@@ -44,7 +44,7 @@ module.exports = {
           }
         }
       });
-      socket.on("create_task", ({students, message})=> sendNotificationV1(students, activeUsers, io.sockets.sockets, message));
+      socket.on("create_task", ({students, message})=> sendNotificationV1(students, activeUsers, io.sockets.sockets, message, "task_created"));
       socket.on('disconnect', () => console.log("Cliente desconectado"));
     });
     strapi.io = io;
