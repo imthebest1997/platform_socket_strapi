@@ -17,33 +17,19 @@ module.exports = {
    * run jobs, or perform some special logic.
    */
   bootstrap({ strapi }) {
-    let {Server} = require("socket.io");
+    const io = require("./sockets/socket");
     const { getActiveUsers, createActiveUser, findUserInArray, updateActiveUser } = require("./external-services/active-users-service");
-
-    let axios = require("axios");
-
-    let io = new Server(strapi.server.httpServer,{
-      cors:{
-        origin: "http://127.0.0.1:5173",
-        methods: ["GET", "POST", "PUT"],
-        allowedHeaders: ["my-custom-header"],
-        credentials: true
-      }
-    });
-
+    const {sendNotificationV1} = require("./sockets/socket-notification");
     let activeUsers = [];
     let users = {};
     io.on("connection", async (socket) => {
-
       //Consultar el listado de usuarios conectados
       activeUsers = await getActiveUsers();
-
       //Cuando un usuario se conecta, emite su ID
       socket.on('setUserId', async ({userId, token}) => {
         if(userId !== undefined){
           //Buscar el id del usuario en la coleccion
           const user = await findUserInArray(activeUsers, userId);
-
           if(user.length === 0){
             //Crear usuario
             const {data, status} = await createActiveUser(socket.id, userId, token);
@@ -58,33 +44,8 @@ module.exports = {
           }
         }
       });
-
-      socket.on("create_task", ({students, ...taskCreated})=>{
-        for(let idStudent of students){
-          const userConnected = activeUsers.find((user) => user.user_id === idStudent.toString());
-          //Versión v1.
-          io.sockets.sockets.forEach((socket) => {
-            if (socket.id === userConnected?.socket_id && userConnected) {
-              socket.emit("task_created", {
-                ...taskCreated,
-                message: "Tarea creada v2 satisfactoriamente"
-              });
-            }
-          });
-
-          //Versión v2.
-          //Si el usuario conectado se le emite la notificacion en tiempo real.
-          if(userConnected && users[idStudent]){
-            users[idStudent].emit("task_created", {
-              ...taskCreated,
-              message: "Tarea creada satisfactoriamente"
-            });
-          }
-        }
-      });
-
-    socket.on('disconnect', () => console.log("Cliente desconectado"));
-
+      socket.on("create_task", ({students, message})=> sendNotificationV1(students, activeUsers, io.sockets.sockets, message));
+      socket.on('disconnect', () => console.log("Cliente desconectado"));
     });
     strapi.io = io;
   },
