@@ -20,6 +20,8 @@ module.exports = {
     const io = require("./sockets/socket");
     const { getActiveUsers, createActiveUser, findUserInArray, updateActiveUser } = require("./external-services/active-users-service");
     const {sendNotificationV1} = require("./sockets/socket-notification");
+    const sendNotification = require('./plugins/send-notification');
+
     let activeUsers = [];
     let users = {};
     io.on("connection", async (socket) => {
@@ -44,7 +46,9 @@ module.exports = {
           }
         }
       });
-      socket.on("create_task", ({students, message})=> sendNotificationV1(students, activeUsers, io.sockets.sockets, message, "task_created"));
+      // socket.on("create_task", ({students, message})=> sendNotificationV1(students, activeUsers, io.sockets.sockets, message, "task_created"));
+      socket.on("create_task", ({students, message})=> sendNotification(students, activeUsers, io.sockets.sockets, message, "task_created"));
+
       socket.on('disconnect', () => console.log("Cliente desconectado"));
     });
     strapi.io = io;
