@@ -13,6 +13,7 @@ module.exports = {
       //Cuando un usuario se conecta, emite su ID
       socket.on('setUserId', async ({userId, token}) => {
         if(userId !== undefined){
+          console.log(`User with socket id: ${socket.id} y id: ${userId}`);
           //Buscar el id del usuario en la coleccion
           const user = await findUserInArray(activeUsers, userId);
           if(user.length === 0){
@@ -20,7 +21,7 @@ module.exports = {
             await createActiveUser(socket.id, userId, token);
             activeUsers = await getActiveUsers();
           }else{
-            //Identificar si el id del socket a actualizar es distinto al socket registro en la bd
+            //Identificar si el id del socket a actualizar es distinto al socket registrado en la bd
             if(user[0].socket_id !== socket.id){
               console.log("El socket cambio");
               //Actualizar usuario

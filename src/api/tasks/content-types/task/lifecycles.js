@@ -217,20 +217,17 @@ module.exports = {
     //TODO: Todo funcionara cuando se use React o Postman para consumir la peticion (con params)
     //TODO: Para enviar desde el content manager hay q hacer una peticion adicional.
     const { result, params } = event;
-    const { data } = params;
-    const { lessons } = data;
+    // const { data } = params;
+    // const { lessons } = data;
     await createGrantPermissions(result);
     await addReferenceCohort(result);
 
     const lessonId = await getLessonId(result.id);
-    console.log(lessonId);
-
     const students = await getStudentsId(lessonId);
     // const students = await getStudentsId(lessons[0]);
 
     //Sockets y coleccion de usuarios conectados.
     const {sockets} = require("../../../../index");
-
     const activeUsers = await getActiveUsers();
 
     if(sockets && (activeUsers && activeUsers?.length > 0) && (students && students.length > 0)){
@@ -253,11 +250,10 @@ module.exports = {
     const { result, params} = event;
     await addReferenceCohort(result);
 
-    const { data } = params;
-    const { lessons } = data;
+    // const { data } = params;
+    // const { lessons } = data;
 
     const lessonId = await getLessonId(result.id);
-    console.log(lessonId);
 
     // const students = await getStudentsId(lessons[0]);
     const students = await getStudentsId(lessonId);
