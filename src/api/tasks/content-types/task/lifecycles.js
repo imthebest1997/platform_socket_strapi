@@ -1,6 +1,8 @@
 'use strict';
 
 const { difference, isEmpty } = require('lodash');
+const sendNotification = require('../../../../plugins/send-notification');
+const { getActiveUsers } = require('../../../../external-services/active-users-service');
 
 /**
  * Lifecycle callbacks for the `task` model.
@@ -159,16 +161,88 @@ const grantPermissions = async (lessons, taskId) => {
   }
 };
 
+//TODO: New function to get students id.
+const getStudentsId = async(lessons) =>{
+  const lesson = await strapi.db.query('api::lessons.lesson').findOne({
+    where: {id: lessons},
+    populate: ['course_id'],
+  });
+
+  if (!lesson) {
+    return [];
+  }
+
+  const course = await strapi.db.query('api::courses.course').findOne({
+    where: {id: lesson.course_id.id},
+    populate: ['cohort'],
+  });
+
+  if (!course) {
+    return [];
+  }
+
+  const cohort = await strapi.db.query('api::cohorts.cohort').findOne({
+    where: {id: course.cohort.id},
+    populate: ['students'],
+  });
+
+  if (!cohort) {
+    return [];
+  }
+
+  return cohort.students.map(student => student.id);
+}
+
+//TODO: Solo se usa cuando se pide usar el Content Manager de Strapi
+const getLessonId = async(taskId) =>{
+  const task = await strapi.db.query('api::tasks.task').findOne({
+    where: {id: taskId},
+    populate: ['lessons'],
+  });
+
+  if (!task) {
+    return [];
+  }
+
+  return task.lessons.map(lesson => lesson.id);
+}
+
 module.exports = {
   async beforeCreate(event) {
     let { data } = event.params;
     trimParamsValidation(data);
   },
+
   async afterCreate(event) {
-    const { result } = event;
+    //TODO: Todo funcionara cuando se use React o Postman para consumir la peticion (con params)
+    //TODO: Para enviar desde el content manager hay q hacer una peticion adicional.
+    const { result, params } = event;
+    const { data } = params;
+    const { lessons } = data;
     await createGrantPermissions(result);
     await addReferenceCohort(result);
+
+    const lessonId = await getLessonId(result.id);
+    console.log(lessonId);
+
+    const students = await getStudentsId(lessonId);
+    // const students = await getStudentsId(lessons[0]);
+
+    //Sockets y coleccion de usuarios conectados.
+    const {sockets} = require("../../../../index");
+
+    const activeUsers = await getActiveUsers();
+
+    if(sockets && (activeUsers && activeUsers?.length > 0) && (students && students.length > 0)){
+      // console.log({sockets, activeUsers, students});
+      console.log("Sending notifications");
+      await sendNotification(students, activeUsers, sockets, "Task created from lifecycle", "task_created");
+    }else{
+      // console.log({sockets, activeUsers, students});
+      console.error("Uno de los datos enviados está vacío.");
+    }
   },
+
   async beforeUpdate(event) {
     let { data, where } = event.params;
     trimParamsValidation(data);
@@ -176,7 +250,30 @@ module.exports = {
     await deleteReferenceCohort(where, data);
   },
   async afterUpdate(event) {
-    const { result } = event;
+    const { result, params} = event;
     await addReferenceCohort(result);
+
+    const { data } = params;
+    const { lessons } = data;
+
+    const lessonId = await getLessonId(result.id);
+    console.log(lessonId);
+
+    // const students = await getStudentsId(lessons[0]);
+    const students = await getStudentsId(lessonId);
+
+    //Sockets y coleccion de usuarios conectados.
+    const {sockets} = require("../../../../index");
+    const activeUsers = await getActiveUsers();
+
+    if(sockets && (activeUsers && activeUsers?.length > 0) && (students && students.length > 0)){
+      // console.log({sockets, activeUsers, students});
+      console.log("Sending notifications");
+      await sendNotification(students, activeUsers, sockets, "Task updated from lifecycle", "task_updated");
+    }else{
+      // console.log({sockets, activeUsers, students});
+      console.error("Uno de los datos enviados está vacío.");
+    }
+
   },
 };

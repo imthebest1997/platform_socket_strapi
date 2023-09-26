@@ -14,7 +14,9 @@ module.exports = createCoreController('api::tasks.task', ({ strapi }) => ({
       { user: { id: ctx.state.user.id, email: ctx.state.user.email } },
       `Ingresando a la consulta buscar tareas, petición realizada por el usuario: : '${ctx.state?.user.email}'`
     );
-    const tasks = await strapi.db.query('api::tasks.task').findMany();
+    const tasks = await strapi.db.query('api::tasks.task').findMany({
+      populate: ['lessons']
+    });
 
     return tasks;
   },
@@ -88,6 +90,7 @@ module.exports = createCoreController('api::tasks.task', ({ strapi }) => ({
     const result = await strapi.service('api::tasks.task').update(id, ctx.request.body);
     return result;
   },
+
   async create(ctx) {
     const customerIp = ctx.request.ip;
     const geo = geoip.lookup(customerIp);
@@ -96,9 +99,7 @@ module.exports = createCoreController('api::tasks.task', ({ strapi }) => ({
     const { task_finish_date } = dataCreate.data;
     dataCreate.data.task_finish_date = zonedTimeToUtc(task_finish_date, geo?.timezone);
     const result = await strapi.service('api::tasks.task').create(ctx.request.body);
-    // Emitir el evento de creación de tarea al servidor de sockets
-    // strapi.io.emit('taskCreated', result);
-    // console.log(result);
+
     return result;
   },
 }));
