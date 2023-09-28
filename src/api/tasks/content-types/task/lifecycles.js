@@ -162,7 +162,7 @@ const grantPermissions = async (lessons, taskId) => {
 };
 
 //TODO: New function to get students id.
-const getStudentsId = async(lessons) =>{
+const getStudentsIdAndCohortId = async(lessons) =>{
   const lesson = await strapi.db.query('api::lessons.lesson').findOne({
     where: {id: lessons},
     populate: ['course_id'],
@@ -190,11 +190,14 @@ const getStudentsId = async(lessons) =>{
     return [];
   }
 
-  return cohort.students.map(student => student.id);
+  return {
+    cohort: cohort.id,
+    students: cohort.students.map(student => student.id)
+  }
 }
 
 //TODO: Solo se usa cuando se pide usar el Content Manager de Strapi
-const getLessonId = async(taskId) =>{
+const getLessonIdAndSlug = async(taskId) =>{
   const task = await strapi.db.query('api::tasks.task').findOne({
     where: {id: taskId},
     populate: ['lessons'],
@@ -204,8 +207,26 @@ const getLessonId = async(taskId) =>{
     return [];
   }
 
-  return task.lessons.map(lesson => lesson.id);
+  return {
+    slug: task.lessons[0].slug,
+    lessonId: task.lessons.map(lesson => lesson.id)
+  }
 }
+
+const createNotificationsToAllUsers = async(notification, students) =>{
+  for(const student of students){
+    const strapiData = {
+      data: {
+        ...notification,
+        user: student
+      }
+    };
+    await strapi.db.query('api::notification.notification').create(strapiData);
+    console.log("Notificacion creada");
+  }
+}
+
+
 
 module.exports = {
   async beforeCreate(event) {
@@ -222,9 +243,26 @@ module.exports = {
     await createGrantPermissions(result);
     await addReferenceCohort(result);
 
-    const lessonId = await getLessonId(result.id);
-    const students = await getStudentsId(lessonId);
-    // const students = await getStudentsId(lessons[0]);
+    const {lessonId, slug} = await getLessonIdAndSlug(result.id);
+    const {cohort, students} = await getStudentsIdAndCohortId(lessonId);
+
+    //Objeto para crear notificaciones.
+    const link = `http://127.0.0.1:5173/info-task/${slug}#${result.id}`;
+
+    const notification = {
+      title: result.title,
+      isRead: false,
+      isOpenPanel: false,
+      link,
+      cohort,
+      body:{
+        message: result.content,
+        slug,
+        id_actividad: result.id,
+        fecha_emision: new Date(),
+        tipo_actividad: "Tasks"
+      }
+    }
 
     //Sockets y coleccion de usuarios conectados.
     const {sockets} = require("../../../../index");
@@ -233,6 +271,7 @@ module.exports = {
     if(sockets && (activeUsers && activeUsers?.length > 0) && (students && students.length > 0)){
       // console.log({sockets, activeUsers, students});
       console.log("Sending notifications");
+      await createNotificationsToAllUsers(notification, students);
       await sendNotification(students, activeUsers, sockets, "Task created from lifecycle", "task_created");
     }else{
       // console.log({sockets, activeUsers, students});
@@ -246,6 +285,7 @@ module.exports = {
     await validateRelationLesson(where, data);
     await deleteReferenceCohort(where, data);
   },
+
   async afterUpdate(event) {
     const { result, params} = event;
     await addReferenceCohort(result);
@@ -253,10 +293,10 @@ module.exports = {
     // const { data } = params;
     // const { lessons } = data;
 
-    const lessonId = await getLessonId(result.id);
+    const {lessonId, slug} = await getLessonIdAndSlug(result.id);
 
     // const students = await getStudentsId(lessons[0]);
-    const students = await getStudentsId(lessonId);
+    const {cohort, students} = await getStudentsIdAndCohortId(lessonId);
 
     //Sockets y coleccion de usuarios conectados.
     const {sockets} = require("../../../../index");
