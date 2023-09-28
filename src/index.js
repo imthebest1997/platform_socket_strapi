@@ -23,7 +23,6 @@ module.exports = {
           }else{
             //Identificar si el id del socket a actualizar es distinto al socket registrado en la bd
             if(user[0].socket_id !== socket.id){
-              console.log("El socket cambio");
               //Actualizar usuario
               await updateActiveUser(socket.id, userId, token);
               activeUsers = await getActiveUsers();

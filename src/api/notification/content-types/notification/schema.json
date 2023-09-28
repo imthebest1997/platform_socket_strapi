@@ -15,9 +15,6 @@
     "title": {
       "type": "string"
     },
-    "message": {
-      "type": "string"
-    },
     "isRead": {
       "type": "boolean",
       "default": false
@@ -25,33 +22,22 @@
     "link": {
       "type": "string"
     },
-    "task": {
+    "user": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "api::tasks.task"
+      "target": "plugin::users-permissions.user"
     },
-    "course": {
+    "cohort": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "api::courses.course"
+      "target": "api::cohorts.cohort"
     },
-    "final_date": {
-      "type": "datetime"
+    "body": {
+      "type": "json"
     },
-    "foro": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::forums.forum"
-    },
-    "evaluacion": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::evaluations.evaluation"
-    },
-    "juego": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::games.game"
+    "isOpenPanel": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

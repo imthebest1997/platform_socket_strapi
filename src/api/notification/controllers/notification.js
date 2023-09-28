@@ -11,7 +11,7 @@ module.exports = createCoreController('api::notification.notification', ({ strap
   async find(ctx){
     try {
       const notifications = await strapi.db.query('api::notification.notification').findMany({
-        populate: ['course', 'task', 'foro', 'evaluacion', 'juego']
+        populate: ['user', 'cohort']
       });
       return notifications;
     } catch (error) {
@@ -36,6 +36,72 @@ module.exports = createCoreController('api::notification.notification', ({ strap
 
     return notifications;
   },
+
+  async findNotificationsByUserId(ctx){
+    const { idUser } = ctx.params;
+
+    const notifications = await strapi.db.query('api::notification.notification').findMany({
+      where: {user: idUser},
+      populate: ['user', 'cohort']
+    });
+
+    return notifications;
+  },
+
+  async updateNotificationsByStatePanel(ctx){
+    const { id } = ctx.params;
+
+    const notification = await strapi.db.query('api::notification.notification').findOne({
+      where: {id: id},
+    });
+
+    //Si la notification no existe debera lanzar un error
+    if(!notification){
+      return ctx.throw(404, 'No existe la notificación.');
+    }
+
+    //Actualizar el isOpenPanel de notifications
+    await strapi.db.query('api::notification.notification').update({
+      where: {id: notification.id},
+      data: {
+        isOpenPanel: !notification.isOpenPanel
+      }
+    });
+
+    return {
+      message: "Se actualizaron las notificaciones correctamente"
+    };
+  },
+
+  async updateNotificationByReadState(ctx){
+    const { id } = ctx.params;
+
+    const notification = await strapi.db.query('api::notification.notification').findOne({
+      where: {id: id},
+      populate: ['user']
+    });
+
+    //Si la notification no existe debera lanzar un error
+    if(!notification){
+      return ctx.throw(404, 'No existe la notificación.');
+    }
+
+    //Actualizar el isOpenPanel de notifications
+    await strapi.db.query('api::notification.notification').update({
+      where: {id: notification.id},
+      data: {
+        isRead: !notification.isRead
+      }
+    });
+
+    const notifications = await strapi.db.query('api::notification.notification').findMany({
+      where: {user: notification.user.id},
+      populate: ['user', 'cohort']
+    });
+
+    return notifications;
+  },
+
 
   async findOne(ctx){
     try {

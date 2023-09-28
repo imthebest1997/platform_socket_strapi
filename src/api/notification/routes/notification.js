@@ -15,8 +15,13 @@ module.exports = {
     },
     {
       method: 'GET',
-      path: '/notifications/:course',
+      path: '/notifications/course/:course',
       handler: 'api::notification.notification.findNotificationsByCourse',
+    },
+    {
+      method: 'GET',
+      path: '/notifications/:idUser',
+      handler: 'api::notification.notification.findNotificationsByUserId',
     },
     {
       method: 'GET',
@@ -32,6 +37,16 @@ module.exports = {
       method: 'PUT',
       path: '/notifications/:id',
       handler: 'api::notification.notification.update',
+    },
+    {
+      method: 'PUT',
+      path: '/notifications/statePanel/:id',
+      handler: 'api::notification.notification.updateNotificationsByStatePanel',
+    },
+    {
+      method: 'PUT',
+      path: '/notifications/stateRead/:id',
+      handler: 'api::notification.notification.updateNotificationByReadState',
     },
     {
       method: 'DELETE',
