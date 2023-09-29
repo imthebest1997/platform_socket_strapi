@@ -47,6 +47,7 @@ module.exports = createCoreController('api::tasks.task', ({ strapi }) => ({
 
     return tasks;
   },
+
   async findOne(ctx) {
     const { id } = ctx.params;
     const { courseSlug } = ctx.request.query;
@@ -80,6 +81,28 @@ module.exports = createCoreController('api::tasks.task', ({ strapi }) => ({
 
     return result;
   },
+
+  async findOneByIdAndSlug(ctx) {
+    const { id, slug} = ctx.params;
+
+    strapi.log.debug({ user: { id: ctx.state.user.id, email: ctx.state.user.email } }, `FindOne task where id = : '${id}' n' slug = : ${slug}`);
+
+    let result = await strapi.db.query('api::tasks.task').findOne({
+      where: { id: id, active: true },
+      populate: ['lessons'],
+    });
+
+    if (!result) {
+      return ctx.notFound('No se encontró la tarea solicitada o no se encuentra activa');
+    }
+
+    if(result.lessons[0].slug === slug){
+      return result;
+    }else{
+      return ctx.notFound('No se encontró la tarea solicitada o el slug es incorrecto.');
+    }
+  },
+
 
   async update(ctx) {
     const customerIp = ctx.request.ip;

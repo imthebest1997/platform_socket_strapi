@@ -15,11 +15,6 @@ module.exports = {
     },
     {
       method: 'GET',
-      path: '/notifications/course/:course',
-      handler: 'api::notification.notification.findNotificationsByCourse',
-    },
-    {
-      method: 'GET',
       path: '/notifications/:idUser',
       handler: 'api::notification.notification.findNotificationsByUserId',
     },

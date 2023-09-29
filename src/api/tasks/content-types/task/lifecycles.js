@@ -222,10 +222,34 @@ const createNotificationsToAllUsers = async(notification, students) =>{
       }
     };
     await strapi.db.query('api::notification.notification').create(strapiData);
-    console.log("Notificacion creada");
   }
 }
 
+const getNotificationsId = async(taskId) => {
+  const notifications = await strapi.db.query('api::notification.notification').findMany();
+
+  const filteredNotifications = notifications.filter((notification) => notification.body.id_actividad === taskId);
+
+  if (!notifications) {
+    return [];
+  }
+
+  return filteredNotifications.map(notification => notification.id);
+}
+
+const updateNotificationsToAllUsers = async(notification, notificationsId) =>{
+  console.log(notificationsId);
+  for(const id of notificationsId){
+    await strapi.db.query('api::notification.notification').update({
+      where: {id: id},
+      data: {
+        ...notification,
+      }
+    });
+
+    console.log("Notificacion actualizada");
+  }
+}
 
 
 module.exports = {
@@ -247,7 +271,7 @@ module.exports = {
     const {cohort, students} = await getStudentsIdAndCohortId(lessonId);
 
     //Objeto para crear notificaciones.
-    const link = `http://127.0.0.1:5173/info-task/${slug}#${result.id}`;
+    const link = `/${slug}#${result.id}`;
 
     const notification = {
       title: result.title,
@@ -255,12 +279,13 @@ module.exports = {
       isOpenPanel: false,
       link,
       cohort,
+      fecha_emision: new Date(),
       body:{
         message: result.content,
         slug,
         id_actividad: result.id,
         fecha_emision: new Date(),
-        tipo_actividad: "Tasks"
+        tipo_actividad: "tasks"
       }
     }
 
@@ -287,27 +312,33 @@ module.exports = {
   },
 
   async afterUpdate(event) {
-    const { result, params} = event;
+    const { result} = event;
     await addReferenceCohort(result);
 
-    // const { data } = params;
-    // const { lessons } = data;
+    const { lessonId, slug} = await getLessonIdAndSlug(result.id);
+    const notificationsId = await getNotificationsId(result.id);
+    const { students } = await getStudentsIdAndCohortId(lessonId);
 
-    const {lessonId, slug} = await getLessonIdAndSlug(result.id);
-
-    // const students = await getStudentsId(lessons[0]);
-    const {cohort, students} = await getStudentsIdAndCohortId(lessonId);
+    const notification = {
+      title: result.title,
+      fecha_emision: new Date(),
+      body:{
+        message: result.content,
+        slug,
+        id_actividad: result.id,
+        fecha_emision: new Date(),
+        tipo_actividad: "tasks"
+      }
+    }
 
     //Sockets y coleccion de usuarios conectados.
     const {sockets} = require("../../../../index");
     const activeUsers = await getActiveUsers();
-
-    if(sockets && (activeUsers && activeUsers?.length > 0) && (students && students.length > 0)){
-      // console.log({sockets, activeUsers, students});
+    if(sockets && (activeUsers && activeUsers?.length > 0) && (students && students.length > 0) && (notificationsId && notificationsId.length > 0)){
       console.log("Sending notifications");
+      await updateNotificationsToAllUsers(notification, notificationsId);
       await sendNotification(students, activeUsers, sockets, "Task updated from lifecycle", "task_updated");
     }else{
-      // console.log({sockets, activeUsers, students});
       console.error("Uno de los datos enviados está vacío.");
     }
 

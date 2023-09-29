@@ -16,6 +16,11 @@ module.exports = {
     },
     {
       method: 'GET',
+      path: '/tasks/:id/:slug',
+      handler: 'api::tasks.task.findOneByIdAndSlug',
+    },
+    {
+      method: 'GET',
       path: '/task/:courseSlug',
       handler: 'api::tasks.task.findTasksByCourse',
     },

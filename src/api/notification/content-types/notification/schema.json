@@ -38,6 +38,9 @@
     "isOpenPanel": {
       "type": "boolean",
       "default": false
+    },
+    "fecha_emision": {
+      "type": "datetime"
     }
   }
 }

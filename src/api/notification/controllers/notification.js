@@ -11,41 +11,43 @@ module.exports = createCoreController('api::notification.notification', ({ strap
   async find(ctx){
     try {
       const notifications = await strapi.db.query('api::notification.notification').findMany({
-        populate: ['user', 'cohort']
+        populate: ['user', 'cohort'],
+        orderBy: [
+          {
+            fecha_emision: 'asc'
+          },
+        ],
       });
+
       return notifications;
     } catch (error) {
       strapi.log.error(
-        "Error al consultar buscar notificaciones"
+        `Error al consultar buscar notificaciones, ${error}`
       );
       return ctx.throw(500, 'Ocurrió un error al buscar notificaciones.');
     }
   },
 
-  async findNotificationsByCourse(ctx){
-    const { course } = ctx.params;
-
-    const courseFound = await strapi.db.query('api::courses.course').findOne({
-      where: {id: course}
-    });
-
-    const notifications = await strapi.db.query('api::notification.notification').findMany({
-      where: {course: courseFound.id},
-      populate: ['course', 'task', 'foro','evaluacion', 'juego']
-    });
-
-    return notifications;
-  },
-
   async findNotificationsByUserId(ctx){
     const { idUser } = ctx.params;
 
-    const notifications = await strapi.db.query('api::notification.notification').findMany({
-      where: {user: idUser},
-      populate: ['user', 'cohort']
-    });
-
-    return notifications;
+    try{
+      const notifications = await strapi.db.query('api::notification.notification').findMany({
+        where: {user: idUser},
+        populate: ['user', 'cohort'],
+        orderBy: [
+          {
+            fecha_emision: 'desc'
+          },
+        ],
+      });
+      return notifications;
+    } catch (error) {
+      strapi.log.error(
+        `Error al consultar buscar notificaciones, ${error}`
+      );
+      return ctx.throw(500, 'Ocurrió un error al buscar notificaciones.');
+    }
   },
 
   async updateNotificationsByStatePanel(ctx){
@@ -101,7 +103,6 @@ module.exports = createCoreController('api::notification.notification', ({ strap
 
     return notifications;
   },
-
 
   async findOne(ctx){
     try {

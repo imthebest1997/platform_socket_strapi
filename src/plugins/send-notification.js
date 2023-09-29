@@ -5,6 +5,7 @@ module.exports = async (students, activeUsers, socketsConnected, message, nameEv
     socketsConnected.forEach((socket) => {
       if (socket.id === userConnected?.socket_id && userConnected) {
         socket.emit(nameEvent, message);
+        socket.emit("new_notifications", "New notifications");
       }
     });
   }
