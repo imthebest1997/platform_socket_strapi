@@ -1,8 +1,10 @@
-'use strict';
+"use strict";
 
-const { difference, isEmpty } = require('lodash');
-const sendNotification = require('../../../../plugins/send-notification');
-const { getActiveUsers } = require('../../../../external-services/active-users-service');
+const { difference, isEmpty } = require("lodash");
+const sendNotification = require("../../../../plugins/send-notification");
+const {
+  getActiveUsers,
+} = require("../../../../external-services/active-users-service");
 
 /**
  * Lifecycle callbacks for the `task` model.
@@ -22,74 +24,98 @@ const deleteReferenceCohort = async (params, data) => {
   if (lessons?.disconnect) {
     lessonsId = lessons?.disconnect.map((lesson) => lesson.id);
   } else {
-    const previusData = await strapi.service('api::tasks.task').findOne(id, { populate: ['lessons'] });
+    const previusData = await strapi
+      .service("api::tasks.task")
+      .findOne(id, { populate: ["lessons"] });
     const idPreviusData = previusData?.lessons.map((res) => res.id);
     const lessonsData = difference(idPreviusData, lessons);
     lessonsId = lessonsData?.map((lesson) => lesson.id);
   }
   if (!isEmpty(lessonsId)) {
-    const courses = await strapi.db.query('api::courses.course').findMany({
+    const courses = await strapi.db.query("api::courses.course").findMany({
       where: { lessons: lessonsId },
     });
     let coursesId = courses.map((course) => course.id);
-    const childrenCourses = await strapi.db.query('api::courses.course').findMany({
-      where: { course_template: coursesId },
-    });
+    const childrenCourses = await strapi.db
+      .query("api::courses.course")
+      .findMany({
+        where: { course_template: coursesId },
+      });
     if (!isEmpty(childrenCourses)) {
       const childrensId = childrenCourses.map((course) => course.id);
       coursesId = [].concat(coursesId, childrensId);
     }
-    const cohorts = await strapi.db.query('api::cohorts.cohort').findMany({
+    const cohorts = await strapi.db.query("api::cohorts.cohort").findMany({
       where: { course: coursesId },
-      populate: { course: { select: ['id'] } },
+      populate: { course: { select: ["id"] } },
     });
     for (const cohort of cohorts) {
       const { id, course } = cohort;
-      const courseData = await strapi.service('api::courses.course').findOne(course.id, { populate: { course_template: true } });
-      const coursesId = courseData.course_template ? [courseData.id, courseData.course_template.id] : [courseData.id];
-      let courseDataReferences = await strapi.service('api::courses.course').getEvaluationsAndTasks({ course: coursesId });
-      courseDataReferences.tasks.ids = courseDataReferences.tasks.ids.filter((id) => id !== params.id);
+      const courseData = await strapi
+        .service("api::courses.course")
+        .findOne(course.id, { populate: { course_template: true } });
+      const coursesId = courseData.course_template
+        ? [courseData.id, courseData.course_template.id]
+        : [courseData.id];
+      let courseDataReferences = await strapi
+        .service("api::courses.course")
+        .getEvaluationsAndTasks({ course: coursesId });
+      courseDataReferences.tasks.ids = courseDataReferences.tasks.ids.filter(
+        (id) => id !== params.id
+      );
       courseDataReferences.tasks.amount = courseDataReferences.tasks.ids.length;
-      await strapi.service('api::cohorts.cohort').update(id, { data: { references: courseDataReferences, active: true } });
+      await strapi
+        .service("api::cohorts.cohort")
+        .update(id, {
+          data: { references: courseDataReferences, active: true },
+        });
     }
   }
 };
 
 const addReferenceCohort = async (data) => {
   const { id } = data;
-  const lessonsResult = await strapi.db.query('api::tasks.task').findOne({
+  const lessonsResult = await strapi.db.query("api::tasks.task").findOne({
     where: { id: id },
-    populate: { lessons: { select: ['id'] } },
+    populate: { lessons: { select: ["id"] } },
   });
   const lessonsId = lessonsResult.lessons.map((lesson) => lesson.id);
-  const courses = await strapi.db.query('api::courses.course').findMany({
+  const courses = await strapi.db.query("api::courses.course").findMany({
     where: { lessons: lessonsId },
   });
   let coursesId = courses.map((course) => course.id);
-  const childrenCourses = await strapi.db.query('api::courses.course').findMany({
-    where: { course_template: coursesId },
-  });
+  const childrenCourses = await strapi.db
+    .query("api::courses.course")
+    .findMany({
+      where: { course_template: coursesId },
+    });
   if (!isEmpty(childrenCourses)) {
     const childrensId = childrenCourses.map((course) => course.id);
     coursesId = [].concat(coursesId, childrensId);
   }
-  const cohorts = await strapi.db.query('api::cohorts.cohort').findMany({
+  const cohorts = await strapi.db.query("api::cohorts.cohort").findMany({
     where: { course: coursesId },
-    populate: { course: { select: ['id'] } },
+    populate: { course: { select: ["id"] } },
   });
   for (const cohort of cohorts) {
     const { id, course } = cohort;
     await strapi
-      .service('api::cohorts.cohort')
-      .update(id, { data: { updateReferences: true, isActiveLessons: true, course: course.id } });
+      .service("api::cohorts.cohort")
+      .update(id, {
+        data: {
+          updateReferences: true,
+          isActiveLessons: true,
+          course: course.id,
+        },
+      });
   }
 };
 
 const createGrantPermissions = async (data) => {
   const { id } = data;
-  const lessonsResult = await strapi.db.query('api::tasks.task').findOne({
+  const lessonsResult = await strapi.db.query("api::tasks.task").findOne({
     where: { id: id },
-    populate: { lessons: { select: ['id', 'references', 'content'] } },
+    populate: { lessons: { select: ["id", "references", "content"] } },
   });
   let references;
   for (const lesson of lessonsResult?.lessons) {
@@ -104,7 +130,7 @@ const createGrantPermissions = async (data) => {
         references = lesson.references;
         references.tasks = [].concat(lesson.references.tasks, id);
       }
-      await strapi.service('api::lessons.lesson').update(lesson?.id, {
+      await strapi.service("api::lessons.lesson").update(lesson?.id, {
         data: {
           content: content,
           references: references,
@@ -121,7 +147,9 @@ const validateRelationLesson = async (params, data) => {
     await removePermissions(lessons.disconnect, id);
     await grantPermissions(lessons.connect, id);
   } else {
-    const previusData = await strapi.service('api::tasks.task').findOne(id, { populate: ['lessons'] });
+    const previusData = await strapi
+      .service("api::tasks.task")
+      .findOne(id, { populate: ["lessons"] });
     const idPreviusData = previusData?.lessons.map((res) => res.id);
     await removePermissions(difference(idPreviusData, lessons), id);
     await grantPermissions(difference(lessons, idPreviusData), id);
@@ -131,12 +159,18 @@ const validateRelationLesson = async (params, data) => {
 const removePermissions = async (lessons, taskId) => {
   for (const lesson of lessons) {
     const id = lesson?.id ? lesson.id : lesson;
-    const lessonsData = await strapi.service('api::lessons.lesson').findOne(id);
+    const lessonsData = await strapi.service("api::lessons.lesson").findOne(id);
     const deleteContent = `\\n<Task id=\\"${taskId}\\"\\/>`;
-    const regex = new RegExp(deleteContent, 'g');
-    const content = lessonsData.content.replace(regex, '');
-    lessonsData.references.tasks = lessonsData.references.tasks.filter((task) => task !== taskId);
-    await strapi.service('api::lessons.lesson').update(id, { data: { content: content, references: lessonsData.references } });
+    const regex = new RegExp(deleteContent, "g");
+    const content = lessonsData.content.replace(regex, "");
+    lessonsData.references.tasks = lessonsData.references.tasks.filter(
+      (task) => task !== taskId
+    );
+    await strapi
+      .service("api::lessons.lesson")
+      .update(id, {
+        data: { content: content, references: lessonsData.references },
+      });
   }
 };
 
@@ -144,7 +178,7 @@ const grantPermissions = async (lessons, taskId) => {
   let references;
   for (const lesson of lessons) {
     const id = lesson?.id ? lesson.id : lesson;
-    const result = await strapi.service('api::lessons.lesson').findOne(id);
+    const result = await strapi.service("api::lessons.lesson").findOne(id);
     if (!result?.content?.includes(`<Task id="${taskId}"/>`)) {
       const content = result?.content + `\n<Task id="${taskId}"/>`;
       if (!result.references) {
@@ -156,34 +190,36 @@ const grantPermissions = async (lessons, taskId) => {
         references = result.references;
         references.tasks = [].concat(result.references.tasks, taskId);
       }
-      await strapi.service('api::lessons.lesson').update(id, { data: { content: content, references: references } });
+      await strapi
+        .service("api::lessons.lesson")
+        .update(id, { data: { content: content, references: references } });
     }
   }
 };
 
 //TODO: New function to get students id.
-const getStudentsIdAndCohortId = async(lessons) =>{
-  const lesson = await strapi.db.query('api::lessons.lesson').findOne({
-    where: {id: lessons},
-    populate: ['course_id'],
+const getStudentsIdAndCohortId = async (lessons) => {
+  const lesson = await strapi.db.query("api::lessons.lesson").findOne({
+    where: { id: lessons },
+    populate: ["course_id"],
   });
 
   if (!lesson) {
     return [];
   }
 
-  const course = await strapi.db.query('api::courses.course').findOne({
-    where: {id: lesson.course_id.id},
-    populate: ['cohort'],
+  const course = await strapi.db.query("api::courses.course").findOne({
+    where: { id: lesson.course_id.id },
+    populate: ["cohort"],
   });
 
   if (!course) {
     return [];
   }
 
-  const cohort = await strapi.db.query('api::cohorts.cohort').findOne({
-    where: {id: course.cohort.id},
-    populate: ['students'],
+  const cohort = await strapi.db.query("api::cohorts.cohort").findOne({
+    where: { id: course.cohort.id },
+    populate: ["students"],
   });
 
   if (!cohort) {
@@ -192,15 +228,16 @@ const getStudentsIdAndCohortId = async(lessons) =>{
 
   return {
     cohort: cohort.id,
-    students: cohort.students.map(student => student.id)
-  }
-}
+    students: cohort.students.map((student) => student.id),
+    slug_course: course.slug,
+  };
+};
 
 //TODO: Solo se usa cuando se pide usar el Content Manager de Strapi
-const getLessonIdAndSlug = async(taskId) =>{
-  const task = await strapi.db.query('api::tasks.task').findOne({
-    where: {id: taskId},
-    populate: ['lessons'],
+const getLessonIdAndSlug = async (taskId) => {
+  const task = await strapi.db.query("api::tasks.task").findOne({
+    where: { id: taskId },
+    populate: ["lessons"],
   });
 
   if (!task) {
@@ -209,48 +246,49 @@ const getLessonIdAndSlug = async(taskId) =>{
 
   return {
     slug: task.lessons[0].slug,
-    lessonId: task.lessons.map(lesson => lesson.id)
-  }
-}
+    lessonId: task.lessons.map((lesson) => lesson.id),
+  };
+};
 
-const createNotificationsToAllUsers = async(notification, students) =>{
-  for(const student of students){
+const createNotificationsToAllUsers = async (notification, students) => {
+  for (const student of students) {
     const strapiData = {
       data: {
         ...notification,
-        user: student
-      }
+        user: student,
+      },
     };
-    await strapi.db.query('api::notification.notification').create(strapiData);
+    await strapi.db.query("api::notification.notification").create(strapiData);
   }
-}
+};
 
-const getNotificationsId = async(taskId) => {
-  const notifications = await strapi.db.query('api::notification.notification').findMany();
+const getNotificationsId = async (taskId) => {
+  const notifications = await strapi.db
+    .query("api::notification.notification")
+    .findMany();
 
-  const filteredNotifications = notifications.filter((notification) => notification.body.id_actividad === taskId);
+  const filteredNotifications = notifications.filter(
+    (notification) => notification.body.id_actividad === taskId
+  );
 
   if (!notifications) {
     return [];
   }
 
-  return filteredNotifications.map(notification => notification.id);
-}
+  return filteredNotifications.map((notification) => notification.id);
+};
 
-const updateNotificationsToAllUsers = async(notification, notificationsId) =>{
-  console.log(notificationsId);
-  for(const id of notificationsId){
-    await strapi.db.query('api::notification.notification').update({
-      where: {id: id},
+const updateNotificationsToAllUsers = async (notification, notificationsId) => {
+  for (const id of notificationsId) {
+    await strapi.db.query("api::notification.notification").update({
+      where: { id: id },
       data: {
         ...notification,
-      }
+      },
     });
-
     console.log("Notificacion actualizada");
   }
-}
-
+};
 
 module.exports = {
   async beforeCreate(event) {
@@ -267,11 +305,11 @@ module.exports = {
     await createGrantPermissions(result);
     await addReferenceCohort(result);
 
-    const {lessonId, slug} = await getLessonIdAndSlug(result.id);
-    const {cohort, students} = await getStudentsIdAndCohortId(lessonId);
+    const { lessonId, slug } = await getLessonIdAndSlug(result.id);
+    const { cohort, students, slug_course } = await getStudentsIdAndCohortId(lessonId);
 
     //Objeto para crear notificaciones.
-    const link = `/${slug}#${result.id}`;
+    const link = `/${slug_course}/${slug}`;
 
     const notification = {
       title: result.title,
@@ -280,25 +318,36 @@ module.exports = {
       link,
       cohort,
       fecha_emision: new Date(),
-      body:{
+      body: {
         message: result.content,
         slug,
         id_actividad: result.id,
         fecha_emision: new Date(),
-        tipo_actividad: "tasks"
-      }
-    }
+        tipo_actividad: "tasks",
+      },
+    };
 
     //Sockets y coleccion de usuarios conectados.
-    const {sockets} = require("../../../../index");
+    const { sockets } = require("../../../../index");
     const activeUsers = await getActiveUsers();
 
-    if(sockets && (activeUsers && activeUsers?.length > 0) && (students && students.length > 0)){
-      // console.log({sockets, activeUsers, students});
+    if (
+      sockets &&
+      activeUsers &&
+      activeUsers?.length > 0 &&
+      students &&
+      students.length > 0
+    ) {
       console.log("Sending notifications");
       await createNotificationsToAllUsers(notification, students);
-      await sendNotification(students, activeUsers, sockets, "Task created from lifecycle", "task_created");
-    }else{
+      await sendNotification(
+        students,
+        activeUsers,
+        sockets,
+        "Task created from lifecycle",
+        "task_created"
+      );
+    } else {
       // console.log({sockets, activeUsers, students});
       console.error("Uno de los datos enviados está vacío.");
     }
@@ -312,35 +361,48 @@ module.exports = {
   },
 
   async afterUpdate(event) {
-    const { result} = event;
+    const { result } = event;
     await addReferenceCohort(result);
 
-    const { lessonId, slug} = await getLessonIdAndSlug(result.id);
+    const { lessonId, slug } = await getLessonIdAndSlug(result.id);
     const notificationsId = await getNotificationsId(result.id);
     const { students } = await getStudentsIdAndCohortId(lessonId);
 
     const notification = {
       title: result.title,
       fecha_emision: new Date(),
-      body:{
+      body: {
         message: result.content,
         slug,
         id_actividad: result.id,
         fecha_emision: new Date(),
-        tipo_actividad: "tasks"
-      }
-    }
+        tipo_actividad: "tasks",
+      },
+    };
 
     //Sockets y coleccion de usuarios conectados.
-    const {sockets} = require("../../../../index");
+    const { sockets } = require("../../../../index");
     const activeUsers = await getActiveUsers();
-    if(sockets && (activeUsers && activeUsers?.length > 0) && (students && students.length > 0) && (notificationsId && notificationsId.length > 0)){
+    if (
+      sockets &&
+      activeUsers &&
+      activeUsers?.length > 0 &&
+      students &&
+      students.length > 0 &&
+      notificationsId &&
+      notificationsId.length > 0
+    ) {
       console.log("Sending notifications");
       await updateNotificationsToAllUsers(notification, notificationsId);
-      await sendNotification(students, activeUsers, sockets, "Task updated from lifecycle", "task_updated");
-    }else{
+      await sendNotification(
+        students,
+        activeUsers,
+        sockets,
+        "Task updated from lifecycle",
+        "task_updated"
+      );
+    } else {
       console.error("Uno de los datos enviados está vacío.");
     }
-
   },
 };

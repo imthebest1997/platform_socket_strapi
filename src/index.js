@@ -10,6 +10,7 @@ module.exports = {
     io.on("connection", async (socket) => {
       //Consultar el listado de usuarios conectados
       activeUsers = await getActiveUsers();
+
       //Cuando un usuario se conecta, emite su ID
       socket.on('setUserId', async ({userId, token}) => {
         if(userId !== undefined){
