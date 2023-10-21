@@ -1,6 +1,4 @@
 "use strict";
-const sendNotification = require("../../../../plugins/send-notification");
-const { getActiveUsers } = require("../../../../external-services/active-users-service");
 
 const trimParamsValidation = async (data) => {
   // Trim all the params after verifying there are present
@@ -113,29 +111,9 @@ module.exports = {
     };
 
     //Sockets y coleccion de usuarios conectados.
-    const activeUsers = await getActiveUsers();
-    const { sockets } = require("../../../../index");
 
-    if (
-      sockets &&
-      activeUsers &&
-      activeUsers?.length > 0 &&
-      students &&
-      students.length > 0
-    ) {
-      console.log("Sending notifications");
-      await createNotificationsToAllUsers(notification, students);
-      await sendNotification(
-        students,
-        activeUsers,
-        sockets,
-        "Forum created sucessfull",
-        "forum_created"
-      );
-    } else {
-      console.error("Uno de los datos enviados está vacío.");
-      console.log(sockets);
-    }
+    await createNotificationsToAllUsers(notification, students);
+    await strapi.emitToAllUsers({ students, message: "Forum updated sucessful", nameEvent: "forum_updated" });
   },
 
   async beforeUpdate(event) {
@@ -153,7 +131,6 @@ module.exports = {
     const { students } = await getStudentsIdAndCourseId(cohortId);
 
     const notificationsId = await getNotificationsId(result.id);
-    const { sockets } = require("../../../../index");
 
     const notification = {
       title: result.title,
@@ -166,29 +143,8 @@ module.exports = {
       },
     };
 
-
     //Sockets y coleccion de usuarios conectados.
-    const activeUsers = await getActiveUsers();
-    if (
-      sockets &&
-      activeUsers &&
-      activeUsers?.length > 0 &&
-      students &&
-      students.length > 0 &&
-      notificationsId &&
-      notificationsId.length > 0
-    ) {
-      console.log("Sending notifications");
       await updateNotificationsToAllUsers(notification, notificationsId);
-      await sendNotification(
-        students,
-        activeUsers,
-        sockets,
-        "Forum updated sucessful",
-        "forum_updated"
-      );
-    } else {
-      console.error("Uno de los datos enviados está vacío.");
-    }
+      await strapi.emitToAllUsers({ students, message: "Forum updated sucessful", nameEvent: "forum_updated" });
   },
 };

@@ -1,11 +1,6 @@
 "use strict";
 
 const { difference, isEmpty } = require("lodash");
-const {
-  getActiveUsers,
-} = require("../../../../external-services/active-users-service");
-const sendNotification = require("../../../../plugins/send-notification");
-
 const { ValidationError } = require("@strapi/utils").errors;
 
 /**
@@ -450,7 +445,7 @@ const getNotificationsId = async (evaluationId) => {
   return filteredNotifications.map((notification) => notification.id);
 };
 
-const createNotificationsToAllUsers = async (notification, students) => {
+const createNotificationsToAllUsers = async ({ notification, students }) => {
   for (const student of students) {
     const strapiData = {
       data: {
@@ -462,7 +457,7 @@ const createNotificationsToAllUsers = async (notification, students) => {
   }
 };
 
-const updateNotificationsToAllUsers = async (notification, notificationsId) => {
+const updateNotificationsToAllUsers = async ({ notification, notificationsId }) => {
   for (const id of notificationsId) {
     await strapi.db.query("api::notification.notification").update({
       where: { id: id },
@@ -515,28 +510,8 @@ module.exports = {
       },
     };
 
-    //Sockets y coleccion de usuarios conectados.
-    const { sockets } = require("../../../../index");
-    const activeUsers = await getActiveUsers();
-
-    if (
-      sockets &&
-      activeUsers &&
-      activeUsers?.length > 0 &&
-      students &&
-      students.length > 0
-    ) {
-      await createNotificationsToAllUsers(notification, students);
-      await sendNotification(
-        students,
-        activeUsers,
-        sockets,
-        "An evaluation has been created.",
-        "evaluation_created"
-      );
-    } else {
-      console.error("Uno de los datos enviados está vacío.");
-    }
+    await createNotificationsToAllUsers({ notification, students });
+    await strapi.emitToAllUsers({ students, message: 'test', nameEvent: 'evaluation_created' });
   },
 
   async beforeUpdate(event) {
@@ -574,27 +549,7 @@ module.exports = {
     };
 
     //Sockets y coleccion de usuarios conectados.
-    const { sockets } = require("../../../../index");
-    const activeUsers = await getActiveUsers();
-    if (
-      sockets &&
-      activeUsers &&
-      activeUsers?.length > 0 &&
-      students &&
-      students.length > 0 &&
-      notificationsId &&
-      notificationsId.length > 0
-    ) {
-      await updateNotificationsToAllUsers(notification, notificationsId);
-      await sendNotification(
-        students,
-        activeUsers,
-        sockets,
-        "The evaluation has been updated.",
-        "evaluation_updated"
-      );
-    } else {
-      console.error("Uno de los datos enviados está vacío.");
-    }
+    await updateNotificationsToAllUsers({ notification, notificationsId });
+    await strapi.emitToAllUsers({ students: students, message: 'test', nameEvent: 'evaluation_created' });
   },
 };
