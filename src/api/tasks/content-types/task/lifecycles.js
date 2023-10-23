@@ -1,11 +1,6 @@
 "use strict";
 
 const { difference, isEmpty } = require("lodash");
-const sendNotification = require("../../../../plugins/send-notification");
-const {
-  getActiveUsers,
-} = require("../../../../external-services/active-users-service");
-
 /**
  * Lifecycle callbacks for the `task` model.
  */
@@ -250,7 +245,7 @@ const getLessonIdAndSlug = async (taskId) => {
   };
 };
 
-const createNotificationsToAllUsers = async (notification, students) => {
+const createNotificationsToAllUsers = async ({ notification, students }) => {
   for (const student of students) {
     const strapiData = {
       data: {
@@ -327,30 +322,8 @@ module.exports = {
       },
     };
 
-    //Sockets y coleccion de usuarios conectados.
-    const { sockets } = require("../../../../index");
-    const activeUsers = await getActiveUsers();
-
-    if (
-      sockets &&
-      activeUsers &&
-      activeUsers?.length > 0 &&
-      students &&
-      students.length > 0
-    ) {
-      console.log("Sending notifications");
-      await createNotificationsToAllUsers(notification, students);
-      await sendNotification(
-        students,
-        activeUsers,
-        sockets,
-        "Task created from lifecycle",
-        "task_created"
-      );
-    } else {
-      // console.log({sockets, activeUsers, students});
-      console.error("Uno de los datos enviados está vacío.");
-    }
+    await createNotificationsToAllUsers({ notification, students });
+    await strapi.emitToAllUsers({ students, message: "Task created from lifecycle", nameEvent: "task_created" });
   },
 
   async beforeUpdate(event) {
@@ -379,30 +352,7 @@ module.exports = {
         tipo_actividad: "tasks",
       },
     };
-
-    //Sockets y coleccion de usuarios conectados.
-    const { sockets } = require("../../../../index");
-    const activeUsers = await getActiveUsers();
-    if (
-      sockets &&
-      activeUsers &&
-      activeUsers?.length > 0 &&
-      students &&
-      students.length > 0 &&
-      notificationsId &&
-      notificationsId.length > 0
-    ) {
-      console.log("Sending notifications");
-      await updateNotificationsToAllUsers(notification, notificationsId);
-      await sendNotification(
-        students,
-        activeUsers,
-        sockets,
-        "Task updated from lifecycle",
-        "task_updated"
-      );
-    } else {
-      console.error("Uno de los datos enviados está vacío.");
-    }
+    await updateNotificationsToAllUsers(notification, notificationsId);
+    await strapi.emitToAllUsers({ students, message: "Task created from lifecycle", nameEvent: "task_created" });
   },
 };

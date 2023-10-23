@@ -1,10 +1,6 @@
 "use strict";
 
 const { difference, isEmpty } = require("lodash");
-const {
-  getActiveUsers,
-} = require("../../../../external-services/active-users-service");
-const sendNotification = require("../../../../plugins/send-notification");
 const { ForbiddenError } = require("@strapi/utils").errors;
 
 /**
@@ -329,28 +325,8 @@ module.exports = {
     };
 
     //Sockets y coleccion de usuarios conectados.
-    const { sockets } = require("../../../../index");
-    const activeUsers = await getActiveUsers();
-
-    if (
-      sockets &&
-      activeUsers &&
-      activeUsers?.length > 0 &&
-      students &&
-      students.length > 0
-    ) {
-      await createNotificationsToAllUsers(notification, students);
-      await sendNotification(
-        students,
-        activeUsers,
-        sockets,
-        "A game has been created.",
-        "game_created"
-      );
-    } else {
-      // console.log({sockets, activeUsers, students});
-      console.error("Uno de los datos enviados está vacío.");
-    }
+    await createNotificationsToAllUsers(notification, students);
+    await strapi.emitToAllUsers({ students, message: "Forum updated sucessful", nameEvent: "forum_updated" });
   },
   async beforeUpdate(event) {
     let { data, where } = event.params;
@@ -378,28 +354,8 @@ module.exports = {
       },
     };
 
-    //Sockets y coleccion de usuarios conectados.
-    const { sockets } = require("../../../../index");
-    const activeUsers = await getActiveUsers();
-    if (
-      sockets &&
-      activeUsers &&
-      activeUsers?.length > 0 &&
-      students &&
-      students.length > 0 &&
-      notificationsId &&
-      notificationsId.length > 0
-    ) {
-      await updateNotificationsToAllUsers(notification, notificationsId);
-      await sendNotification(
-        students,
-        activeUsers,
-        sockets,
-        "The game has been updated.",
-        "game_updated"
-      );
-    } else {
-      console.error("Uno de los datos enviados está vacío.");
-    }
+    await updateNotificationsToAllUsers(notification, notificationsId);
+    await strapi.emitToAllUsers({ students, message: "Forum updated sucessful", nameEvent: "forum_updated" });
+
   },
 };

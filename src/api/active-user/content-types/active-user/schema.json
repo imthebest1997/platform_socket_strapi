@@ -4,7 +4,8 @@
   "info": {
     "singularName": "active-user",
     "pluralName": "active-users",
-    "displayName": "Active User"
+    "displayName": "Active User",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -20,6 +21,11 @@
       "type": "string",
       "required": true,
       "unique": true
+    },
+    "active": {
+      "type": "boolean",
+      "default": false,
+      "required": true
     }
   }
 }
